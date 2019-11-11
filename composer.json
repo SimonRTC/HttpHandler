@@ -1,0 +1,18 @@
+{
+    "name": "simonrtc/httphandler",
+    "description": "Simple HttpHandler for personal APIs projects ",
+    "license": "GPL-3.0-only",
+    "minimum-stability": "stable",
+    "authors": [
+        {
+            "name": "Simon Malpel (SimonRTC)",
+            "email": "simon.malpel@orange.fr"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "HttpHandler\\": "src/"
+        }
+    }
+}
