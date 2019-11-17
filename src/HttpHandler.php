@@ -95,10 +95,11 @@ class HttpHandler {
      *
      * @param  string $method
      * @param  string $url
+     * @param  bool   $JsonDecode
      *
      * @return array
      */
-    public function request(string $method, string $url): ?array {
+    public function request(string $method, string $url, bool $JsonDecode = true): ?array {
         $url = $this->AddUrlQuerys($url, $this->AllowEmptyUrlQuery);
         $ch = curl_init($url);
         (!empty($this->PostData)? $this->PostData: null);
@@ -114,7 +115,7 @@ class HttpHandler {
         $body       = substr($result, $hsize);
 
         $this->QueryResult['headers']   = $this->ParseHeaders($headers);
-        $this->QueryResult['body']      = (!empty($body) && $body? \json_decode($body, true): null);
+        $this->QueryResult['body']      = (!empty($body) && $body? ($JsonDecode? \json_decode($body, true): $body): null);
         return $this->QueryResult;
     }
 
