@@ -19,9 +19,7 @@ class HttpHandler {
         $this->QueryResult  = null;
         $this->PostData     = null;
         $this->Query        = null;
-        $this->Headers      = [
-            'Content-Type: application/json',
-        ];
+        $this->Headers      = [];
         $this->AllowEmptyUrlQuery = false;
     }
 
@@ -63,9 +61,9 @@ class HttpHandler {
      *
      * @return void
      */
-    public function SetPostData(?array $postdata) {
-        $this->PostData = \json_encode($postdata, true);
-        $this->AddHeader('Content-Length:'.strlen($this->PostData));
+    public function SetPostData(?array $postdata, bool $json = true) {
+        $this->PostData = ($json? \json_encode($postdata, true): http_build_query($postdata));
+        ($json? $this->AddHeader('Content-Type: application/json'): null);
     }
 
     /**
@@ -95,16 +93,17 @@ class HttpHandler {
      *
      * @param  string $method
      * @param  string $url
+     * @param  bool   $JsonDecode
      *
      * @return array
      */
-    public function request(string $method, string $url): ?array {
+    public function request(string $method, string $url, bool $JsonDecode = true): ?array {
         $url = $this->AddUrlQuerys($url, $this->AllowEmptyUrlQuery);
         $ch = curl_init($url);
         (!empty($this->PostData)? $this->PostData: null);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        (!empty($this->PostData)? curl_setopt($ch, CURLOPT_POSTFIELDS, $this->PostData): null);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        (!empty($this->PostData)? curl_setopt($ch, CURLOPT_POSTFIELDS, $this->PostData): null);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $this->Headers);
         curl_setopt($ch, CURLOPT_HEADER, true);
         $result = curl_exec($ch);
@@ -114,10 +113,15 @@ class HttpHandler {
         $body       = substr($result, $hsize);
 
         $this->QueryResult['headers']   = $this->ParseHeaders($headers);
-        $this->QueryResult['body']      = (!empty($body) && $body? \json_decode($body, true): null);
+        $this->QueryResult['body']      = (!empty($body) && $body? ($JsonDecode? json_decode($body, true): $body): null);
         return $this->QueryResult;
     }
 
+    /**
+     * GetHttpResultCode
+     *
+     * @return int
+     */
     public function GetHttpResultCode(): int {
         $headers = $this->QueryResult;
         $code = 000;
